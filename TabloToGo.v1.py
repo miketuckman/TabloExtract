@@ -406,6 +406,7 @@ if __name__ == '__main__':
         print '             -c                    Mark matched videos as complete/transfered'
         print '             -debug                Display all msgs'
         print '             -testing              Only processes 1 segmant from Tablo - to test directories, etc - Faster'
+        print '             -sleep                Number of seconds to sleep, used with -a'
         print ' Note: Search Terms are optional and should be in a quote if more than one word.'
         sys.exit()
     try:
