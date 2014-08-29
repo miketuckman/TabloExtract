@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 # TabloExtractor, J. Kenney 2014
+# Forked - M Tuckman 2014
 # A script to pull videos off of the TabloTV OTA Recorder
 
 # Based on information obtained at:
