@@ -326,7 +326,6 @@ if __name__ == '__main__':
         item = string.strip(item)
         if item[0] == '-':
             tmp = string.splitfields(item[1:],':',1)
-            print tmp
             CMDLINE_OPTIONS[string.lower(tmp[0])] = tmp[1:]
 
         else:
