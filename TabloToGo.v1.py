@@ -98,7 +98,8 @@ def get_video(IPADDR, VIDEOID, DIRECTORY, TEMPDIR, FFMPEG, FILENAME, DEBUG, TEST
     while(tmp[0]) == '0':
         tmp = tmp[1:]
     final_int = eval(tmp)
-    temp_id = str(uuid.uuid4())+'-'
+    #temp_id = str(uuid.uuid4())+'-'
+    temp_id = str(VIDEOID)+'-'
     counter = 1
     valid = 1
     concat = ''
@@ -111,9 +112,9 @@ def get_video(IPADDR, VIDEOID, DIRECTORY, TEMPDIR, FFMPEG, FILENAME, DEBUG, TEST
         if string.zfill(counter,5) == final:
             valid = 0
         counter = counter + 1
-        if TESTING:
-            valid = 0 ## Only process first segmant
-    cmd = FFMPEG+' -y -loglevel panic -i "concat:'+concat[:-1]+'" -bsf:a aac_adtstoasc -c copy "'+DIRECTORY+'/'+FILENAME+'.mp4"'
+        if TESTING and counter > 5:
+            valid = 0 ## Only process first 5 segmant
+    cmd = FFMPEG+' -y -i "concat:'+concat[:-1]+'" -bsf:a aac_adtstoasc -c copy "'+DIRECTORY+'/'+FILENAME+'.mp4"'
     if ts:
         cmd = FFMPEG+' -y -loglevel panic -i "concat:'+concat[:-1]+'" -c copy "'+DIRECTORY+'/'+FILENAME+'.ts"'
     if DEBUG: print cmd
@@ -225,6 +226,9 @@ def db_update(TABLOS, DB):
             if not DB[IP].has_key(ID):
                 add_count = add_count + 1
                 DB[IP][ID] = get_meta(IP, ID)
+            elif DB[IP][ID]['proc']['status'] != 'finished':
+                del(DB[IP][ID])
+                DB[IP][ID] = get_meta(IP, ID)
         for ID in DB[IP].keys():
             if not videoids['ids'].has_key(ID):
                 del_count = del_count + 1
@@ -259,8 +263,13 @@ def db_print(TABLOS, DB):
         print 'TabloTV '+str(IP)
         keys = DB[IP].keys()
         keys.sort()
+        print string.ljust('ID', 8),
+        for i in range(len(fields)):
+            fs= fields_size[i]
+            print string.ljust(fields[i], fs),
+        print
         for ID in keys:
-            print string.ljust(str(IP),15),
+            #print string.ljust(str(IP),15),
             print string.ljust(str(ID),8),
             for i in range(len(fields)):
                 f = DB[IP][ID]['proc'][fields[i]]
@@ -327,7 +336,6 @@ if __name__ == '__main__':
         if item[0] == '-':
             tmp = string.splitfields(item[1:],':',1)
             CMDLINE_OPTIONS[string.lower(tmp[0])] = tmp[1:]
-
         else:
             SEARCH = SEARCH+item
 
@@ -446,6 +454,7 @@ if __name__ == '__main__':
         count_found = 0
         count_finished = 0
         count_unprocessed = 0
+        count_recording = 0
         count_transfered = 0
         for IP in TABLOS:
             keys = DB[IP].keys()
@@ -474,14 +483,14 @@ if __name__ == '__main__':
                 elif match_search:
                     count_found = count_found + 1
                     if PROC['status'] != 'finished':
-                        count_finished = count_finished + 1
+                        count_recording = count_recording + 1
                     elif PROC['transfered'] != 'complete':
                         count_unprocessed = count_unprocessed + 1
                         QUEUE.append([IP,ID,PROC['clean'],PROC['status'],PROC['transfered'], PROC])
                     else:
                         count_transfered = count_transfered + 1
     
-        if DEBUG: print ' - Search found '+str(count_found)+' match(es), '+str(count_finished)+' still recording, '+str(count_transfered)+' already done, '+str(count_unprocessed)+' to be downloaded.'
+        if DEBUG: print ' - Search found '+str(count_found)+' match(es), '+str(count_recording)+' still recording, '+str(count_transfered)+' already done, '+str(count_unprocessed)+' to be downloaded.'
         if 1:
             for item in QUEUE:
                 print '   - Match: '+item[2]
