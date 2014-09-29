@@ -58,7 +58,7 @@
 #################################################################################################
 # Import required libraries
 VERSION = 0.23
-import os,sys,string,time,urllib,uuid,re,subprocess
+import os,sys,string,time,urllib,uuid,re,subprocess,urllib2
 global true, false
 true, false = 1, 0
 #DEBUG = true
@@ -81,7 +81,10 @@ def get_list(IPADDR):
 #################################################################################################
 # Function to get a metadata from a videoid from a specific tablo
 def get_meta(IPADDR, VIDEOID):
-    resp = urllib.urlopen('http://'+IPADDR+':18080/pvr/'+str(VIDEOID)+'/meta.txt').read()
+    try:
+        resp = urllib2.urlopen('http://'+IPADDR+':18080/pvr/'+str(VIDEOID)+'/meta.txt').read()
+    except:
+        resp= []
     metadata = ''
     for i in range(len(resp)):
         metadata = metadata + resp[i]
